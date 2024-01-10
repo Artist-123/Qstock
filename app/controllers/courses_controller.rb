@@ -1,7 +1,8 @@
 class CoursesController < ApplicationController
+ load_and_authorize_resource
   #before_action :set_expert
   before_action :set_course, only: [:show, :update, :destroy]
-  # load_and_authorize_resource
+   
 
   
   def index
@@ -70,7 +71,7 @@ class CoursesController < ApplicationController
   
   def destroy
     @course.destroy
-    head :no_content
+   render json: { message: 'Course deleted successfully' }, status: :ok
   end
 
   private

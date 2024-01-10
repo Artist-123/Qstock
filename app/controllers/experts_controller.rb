@@ -1,5 +1,5 @@
 class ExpertsController < ApplicationController
-	 #load_and_authorize_resource
+	 load_and_authorize_resource
   before_action :set_expert, only: [:show, :update, :destroy]
 
 
@@ -36,7 +36,7 @@ class ExpertsController < ApplicationController
   
   def destroy
     @expert.destroy
-    head :no_content
+   render json: { message: 'Expert deleted successfully' }, status: :ok
   end
 
   private

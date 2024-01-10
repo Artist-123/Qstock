@@ -13,7 +13,7 @@ class UsersController < ApplicationController
 
       
       def create
-      	byebug
+      	
         @user = User.new(user_params)
 
         if @user.save
@@ -35,7 +35,8 @@ class UsersController < ApplicationController
 
       def destroy
         @user.destroy
-        head :no_content
+        #head :no_content
+        render json: { message: 'User deleted successfully' }, status: :ok
       end
 
       private

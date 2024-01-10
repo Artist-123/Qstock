@@ -29,7 +29,7 @@
   private
 
   def authenticate_request
-    header = request.headers["Authorization"]
+    header = request.headers["token"]
     header = header.split(" ").last if header
     @decoded = jwt_decode(header)
     def current_user
