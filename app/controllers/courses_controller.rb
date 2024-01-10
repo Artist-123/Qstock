@@ -14,43 +14,42 @@ class CoursesController < ApplicationController
     render json: @course
   end
 
-   def purchase_course
-   	byebug
+  #  def purchase_course
+   	
    
-    course = Course.find(params[:id])
-    user = current_user
+  #   course = Course.find(params[:id])
+  #   user = current_user
 
-    begin
-      charge = Stripe::Charge.create(
-        amount: course.price * 100, # Convert price to cents
-        currency: 'usd',
-        source: params[ 
-         ::credit_card_number => "4242424242424242",
-      ::credit_card_exp_month => "10",
-      ::credit_card_exp_year => "2028",
-      ::credit_card_cvv => "1234"], # Token obtained from Stripe.js or Elements
-        description: "Purchase of #{course.title}" # Adjust as needed
-      )
+  #   begin
+  #     charge = Stripe::Charge.create(
+  #       amount: course.price * 100, # Convert price to cents
+  #       currency: 'usd',
+  #       source: params[ 
+  #        ::credit_card_number => "4242424242424242",
+  #     ::credit_card_exp_month => "10",
+  #     ::credit_card_exp_year => "2028",
+  #     ::credit_card_cvv => "1234"], 
+  #       description: "Purchase of #{course.title}" 
+  #     )
 
-      # Successful charge, save payment-related data in your database
-      Payment.create(
-        user_id: "1",
-        course_id: "1",
-        amount: 320,
-        transaction_id: 1 # Save Stripe transaction ID
-        # Add more payment-related attributes as needed
-      )
+     
+  #     Payment.create(
+  #       user_id: "1",
+  #       course_id: "1",
+  #       amount: 320,
+  #       transaction_id: 1 
+       
 
-      render json: { message: 'Course purchased successfully' }, status: :ok
-    rescue Stripe::CardError => e
-      # Stripe payment failed
-      render json: { error: e.message }, status: :unprocessable_entity
-    end
-  end end
+  #     render json: { message: 'Course purchased successfully' }, status: :ok
+  #   rescue Stripe::CardError => e
+     
+  #     render json: { error: e.message }, status: :unprocessable_entity
+  #   end
+  # end end
  
 
   def create
-  	byebug
+  	
     @course = Course.new(course_params)
     if @course.save
       render json: @course, status: :created

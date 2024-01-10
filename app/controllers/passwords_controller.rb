@@ -13,7 +13,7 @@ class PasswordsController < ApplicationController
    
 
 def resend_otp
-	byebug
+
     user = User.find_by(email: params[:email])
     if user
       user.generate_and_assign_otp 
@@ -26,7 +26,7 @@ def resend_otp
 
 
   def verify_otp
-  	byebug
+  	
     user = User.find_by(email: params[:email])
     if user&.otp_valid?(params[:otp]) 
       render json: { message: 'OTP verified successfully' }, status: :ok

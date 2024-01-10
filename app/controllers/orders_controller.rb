@@ -1,7 +1,7 @@
 class OrdersController < ApplicationController
 
   def create
-  	byebug
+  	
     @order = Order.new(order_params.merge(amount_cents: rand(1000..10000), payment_method: 'credit_card'))
     if @order.save
       render json: { order: @order, payment: @order.payment }, status: :created
