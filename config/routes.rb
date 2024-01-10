@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   post '/verify_otp', to: 'passwords#verify_otp'
   post '/reset_password', to: 'passwords#reset_password'
   resources :experts 
+  get '/experts/:id/courses', to: 'experts#courses', as: 'expert_courses'
   resources :courses
  resources :orders
  post '/courses/:id/purchase', to: 'courses#purchase_course'

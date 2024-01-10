@@ -24,6 +24,12 @@ class ExpertsController < ApplicationController
     end
   end
 
+def courses
+    expert = Expert.find(params[:id])
+    courses = expert.courses 
+    
+    render json: courses, status: :ok
+  end
  
   def update
     if @expert.update(expert_params)
