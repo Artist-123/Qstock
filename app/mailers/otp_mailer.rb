@@ -14,4 +14,10 @@ class OtpMailer < ApplicationMailer
     @new_otp = @user.otp
     mail(to: @user.email, subject: 'Your New OTP')
   end
+
+  def reset_password_email(user, reset_token)
+    @user = user
+    @reset_token = reset_token
+    mail(to: @user.email, subject: 'Reset Your Password')
+  end
 end

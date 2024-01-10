@@ -6,6 +6,7 @@ class User < ApplicationRecord
     validates :password, format: { with: /\A.*(?=.*\d)(?=.*[!@#$%^&*]).*\z/,
     message: 'must contain at least one digit and one special character' }
     before_create :generate_and_assign_otp
+    attr_accessor :activated
     attr_accessor :otp
     attr_accessor :reset_token
     attr_accessor :reset_token_sent_at
@@ -28,8 +29,9 @@ class User < ApplicationRecord
   def generate_and_assign_otp
     self.otp = '%04d' % SecureRandom.random_number(10_000) # Generating a 3-digit OTP (you can adjust the length)
   end
-   def otp_valid?(otp)
-    return false if otp.blank? || self.otp.blank?
-    otp == self.otp
-  end
+   def otp_valid?(entered_otp)
+  return false if entered_otp.blank? || self.otp.blank?
+  entered_otp.strip.downcase == self.otp.strip.downcase
+end
+
 end

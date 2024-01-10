@@ -5,9 +5,12 @@ Rails.application.routes.draw do
   post '/resend_otp', to: 'passwords#resend_otp'
   post '/verify_otp', to: 'passwords#verify_otp'
   post '/reset_password', to: 'passwords#reset_password'
-  resources :experts 
-  get '/experts/:id/courses', to: 'experts#courses', as: 'expert_courses'
+  resources :experts do
+  # get '/experts/:id/courses', to: 'experts#courses', as: 'expert_courses'
+  get 'expert_courses', to: 'experts#expert_courses', on: :member
+  end
+
   resources :courses
  resources :orders
- post '/courses/:id/purchase', to: 'courses#purchase_course'
+ post 'purchase', to: 'courses#purchase_course'
 end

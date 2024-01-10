@@ -1,5 +1,5 @@
 class PasswordsController < ApplicationController
-	skip_before_action :authenticate_request
+	#skip_before_action :authenticate_request
 	def forgot_password
     user = User.find_by(email: params[:email])
     if user
@@ -25,11 +25,14 @@ def resend_otp
   end
 
 
-  def verify_otp
+  
   	
-    user = User.find_by(email: params[:email])
-    if user&.otp_valid?(params[:otp]) 
-      render json: { message: 'OTP verified successfully' }, status: :ok
+   def verify_otp
+   	byebug
+    user = User.find_by(params[:email])
+    if user&.otp_valid?(params[:otp])
+      user.update(activated: true, otp: nil)
+      render json: { message: 'User activated successfully' }
     else
       render json: { error: 'Invalid OTP or user' }, status: :unprocessable_entity
     end
@@ -37,12 +40,25 @@ def resend_otp
 
 
   def reset_password
-    user = User.find_by(reset_token: params[:reset_token])
-    if user&.reset_token_valid?
-      user.update(password: params[:password]) 
-      render json: { message: 'Password reset successfully' }, status: :ok
+     user = User.find_by(email: params[:email])
+
+    if user
+      # Generate and send reset token via email
+      reset_token = SecureRandom.hex(20)
+      user.update(reset_token: reset_token, reset_token_expires_at: 1.hour.from_now)
+
+      # Send reset instructions via email
+      UserMailer.reset_password_email(user, reset_token).deliver_now
+
+      render json: { message: 'Password reset instructions sent successfully' }
     else
-      render json: { error: 'Invalid or expired reset token' }, status: :unprocessable_entity
+      render json: { error: 'User not found' }, status: :not_found
     end
+end
+
+private
+
+  def generate_reset_token
+    SecureRandom.hex(20)
   end
 end

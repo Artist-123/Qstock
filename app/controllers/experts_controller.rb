@@ -1,57 +1,63 @@
 class ExpertsController < ApplicationController
-	 load_and_authorize_resource
-  before_action :set_expert, only: [:show, :update, :destroy]
-
-
-  
   def index
-    @experts = Expert.all
-    render json: @experts
+    experts = Expert.all
+    render json: experts
   end
 
- 
   def show
-    render json: @expert
+    expert = Expert.find_by(id: params[:id])
+    if expert.present?
+      render json: expert
+    else
+      render json: { error: 'Expert not found' }, status: :not_found
+    end
   end
 
- 
   def create
-    @expert = Expert.new(expert_params)
-    if @expert.save
-      render json: @expert, status: :created
+    expert = Expert.new(expert_params)
+    if expert.save
+      render json: expert, status: :created
     else
-      render json: @expert.errors, status: :unprocessable_entity
+      render json: { error: 'Failed to create expert' }, status: :unprocessable_entity
     end
   end
 
-def courses
-    expert = Expert.find(params[:id])
-    courses = expert.courses 
-    
-    render json: courses, status: :ok
-  end
- 
   def update
-    if @expert.update(expert_params)
-      render json: @expert
+    expert = Expert.find_by(id: params[:id])
+    if expert
+      if expert.update(expert_params)
+        render json: expert
+      else
+        render json: { error: 'Failed to update expert' }, status: :unprocessable_entity
+      end
     else
-      render json: @expert.errors, status: :unprocessable_entity
+      render json: { error: 'Expert not found' }, status: :not_found
     end
   end
 
-  
+def expert_courses
+     expert = Expert.find_by(id: params[:expert_id])
+    if expert
+      courses = expert.courses
+      render json: courses
+    else
+      render json: { error: 'Expert not found' }, status: :not_found
+    end
+  end
+
   def destroy
-    @expert.destroy
-   render json: { message: 'Expert deleted successfully' }, status: :ok
+    expert = Expert.find_by(id: params[:id])
+    if expert
+      expert.destroy
+      render json: { message: 'Expert deleted successfully'}
+    else
+      render json: { error: 'Expert not found' }, status: :not_found
+    end
   end
 
   private
 
-  def set_expert
-    @expert = Expert.find(params[:id])
-  end
-
   def expert_params
-    params.require(:expert).permit(:name, :expertise, :description)
+    params.require(:expert).permit(:name, :description, :expertise)
   end
 end
