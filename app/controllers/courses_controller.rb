@@ -13,7 +13,7 @@ class CoursesController < ApplicationController
       render json: { error: 'Course not found' }, status: :not_found
     end
   end
-
+ 
   def create
     course = Course.new(course_params)
     if course.save

@@ -1,5 +1,5 @@
 class PasswordsController < ApplicationController
-	#skip_before_action :authenticate_request
+	skip_before_action :authenticate_request, only: [:forgot_password, :resend_otp, :verify_otp]
 	def forgot_password
     user = User.find_by(email: params[:email])
     if user
@@ -18,7 +18,7 @@ def resend_otp
     if user
       user.generate_and_assign_otp 
       OtpMailer.resend_otp_email(user).deliver_now 
-      render json: { message: 'New OTP sent successfully' }, status: :ok
+      render json: { message: 'New OTP sent successfully', otp: user.otp }, status: :ok
     else
       render json: { error: 'User not found' }, status: :not_found
     end
@@ -28,11 +28,12 @@ def resend_otp
   
   	
    def verify_otp
-   	byebug
-    user = User.find_by(params[:email])
-    if user&.otp_valid?(params[:otp])
-      user.update(activated: true, otp: nil)
-      render json: { message: 'User activated successfully' }
+   	
+    user = User.find_by(email: params[:verify_otp][:email])
+    if user.present? && user.otp_valid?(params[:verify_otp][:otp])
+      user.update!(activated: true) 
+
+      render json: { message: 'OTP verified and account activated successfully. You can now log in.' }
     else
       render json: { error: 'Invalid OTP or user' }, status: :unprocessable_entity
     end

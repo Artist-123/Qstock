@@ -1,8 +1,8 @@
  class ApplicationController < ActionController::Base
  	protect_from_forgery with: :null_session, if: -> { request.format.json? }
- 	#include JsonWebToken
+ 	include JsonWebToken
 
- 	#before_action :authenticate_request
+ 	before_action :authenticate_request
  	 rescue_from CanCan::AccessDenied do |exception|
     respond_to do |format|
       format.json{ render json: { error: 'Access Denied - You are not authorized to perform this action' }, status: :forbidden }
