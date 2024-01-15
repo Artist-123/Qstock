@@ -19,7 +19,7 @@ module JsonWebToken
 	rescue JSON::ParserError => e
 		logger.error "Missing required parameters: #{e.message}"
 		render json: { error: 'Invalid JSON format' }, status: :unprocessable_entity
-end
+	end
 end
 
 

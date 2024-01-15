@@ -1,11 +1,9 @@
 class ExpertSerializer < ActiveModel::Serializer
-  include Rails.application.routes.url_helpers
-
-  attributes :id, :name, :description, :expertise
-  attribute :profile_picture do |object|
-
+  attributes :id, :name, :description, :expertise, :profile_picture
+  
   def profile_picture
-    rails_blob_path(object.profile_picture, only_path: true) if object.profile_picture.attached?
+  if object.profile_picture.attached?
+  		Rails.application.routes.url_helpers.rails_blob_path(object.profile_picture, only_path: true)	
+  	end
   end
-end
 end

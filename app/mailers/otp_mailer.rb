@@ -3,11 +3,16 @@ class OtpMailer < ApplicationMailer
 		@user = user
 		mail(to: @user.email, subject: "Welcome, #{@user.name}")
 	end
-	def forgot_password_email(user)
+
+  
+	def forgot_password_email(user, token)
     @user = user
-    @reset_link = "https://yourapp.com/reset_password?token=#{user.reset_token}"
+    @user.generate_reset_password_token 
+    @reset_link = "https://yourapp.com/reset_password?token=#{token}"
+    @token = token
     mail(to: @user.email, subject: 'Reset Your Password')
   end
+
 
   def resend_otp_email(user)
     @user = user
@@ -15,9 +20,9 @@ class OtpMailer < ApplicationMailer
     mail(to: @user.email, subject: 'Your New OTP')
   end
 
-  def reset_password_email(user, reset_token)
+  
+  def reset_password_email(user)
     @user = user
-    @reset_token = reset_token
-    mail(to: @user.email, subject: 'Reset Your Password')
+    mail(to: @user.email, subject: 'Password updated successfully')
   end
 end

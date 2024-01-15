@@ -1,65 +1,67 @@
 class PasswordsController < ApplicationController
-	skip_before_action :authenticate_request, only: [:forgot_password, :resend_otp, :verify_otp]
-	def forgot_password
-    user = User.find_by(email: params[:email])
-    if user
-      user.generate_reset_token 
-      OtpMailer.forgot_password_email(user).deliver_now 
-      render json: { message: 'Password reset link sent successfully' }, status: :ok
-    else
-      render json: { error: 'User not found' }, status: :not_found
-    end
-  end
-   
-
-def resend_otp
-
-    user = User.find_by(email: params[:email])
-    if user
-      user.generate_and_assign_otp 
-      OtpMailer.resend_otp_email(user).deliver_now 
-      render json: { message: 'New OTP sent successfully', otp: user.otp }, status: :ok
-    else
-      render json: { error: 'User not found' }, status: :not_found
-    end
+ skip_before_action :authenticate_request, only: [:forgot_password, :resend_otp, :verify_otp, :reset_password]
+ 
+ def forgot_password
+  user = User.find_by(email: params[:email])
+  token = jwt_encode(user_id: user.id)
+  if user.update(reset_password_token: token, reset_password_token_sent_at: Time.now)
+   OtpMailer.forgot_password_email(user, token).deliver_now 
+    render json: { message: 'Password reset instructions sent to your email', reset_password_token: token  }, status: :ok
+   else
+    render json: { error: 'User not found' }, status: :not_found
+   end
   end
 
 
-  
-  	
-   def verify_otp
-   	
-    user = User.find_by(email: params[:verify_otp][:email])
-    if user.present? && user.otp_valid?(params[:verify_otp][:otp])
-      user.update!(activated: true) 
+  def resend_otp
+     user = User.find_by(email: params[:email])
+   if user
+    user.generate_and_assign_otp 
+    OtpMailer.resend_otp_email(user).deliver_now 
+    render json: { message: 'New OTP sent successfully', otp: user.otp }, status: :ok
+   else
+    render json: { error: 'User not found' }, status: :not_found
+   end
+  end
 
-      render json: { message: 'OTP verified and account activated successfully. You can now log in.' }
-    else
-      render json: { error: 'Invalid OTP or user' }, status: :unprocessable_entity
-    end
+
+  def verify_otp
+   user = User.find_by(email: params[:verify_otp][:email])
+   if user.present? && user.otp_valid?(params[:verify_otp][:otp])
+    user.update!(activated: true) 
+
+    render json: { message: 'OTP verified and account activated successfully. You can now log in.' }
+   else
+    render json: { error: 'Invalid OTP or user' }, status: :unprocessable_entity
+   end
   end
 
 
   def reset_password
-     user = User.find_by(email: params[:email])
+   token = params[:token]
+   user = User.find_by(email: params[:email])
 
-    if user
-      # Generate and send reset token via email
-      reset_token = SecureRandom.hex(20)
-      user.update(reset_token: reset_token, reset_token_expires_at: 1.hour.from_now)
+   if token_valid(user) && user.reset_password_token == token
+    new_password = params[:new_password]
 
-      # Send reset instructions via email
-      UserMailer.reset_password_email(user, reset_token).deliver_now
+    if new_password.present?
+     user.update(password: new_password, reset_password_token: nil)
 
-      render json: { message: 'Password reset instructions sent successfully' }
+     OtpMailer.reset_password_email(user).deliver_now
+
+     render json: { message: 'Password updated successfully', }, status: :ok
     else
-      render json: { error: 'User not found' }, status: :not_found
+     render json: { error: 'New password is required' }, status: :unprocessable_entity
     end
-end
-
-private
-
-  def generate_reset_token
-    SecureRandom.hex(20)
+   else
+    render json: { error: 'Invalid or expired token' }, status: :unprocessable_entity
+   end
   end
-end
+  private
+
+  def token_valid(user)
+
+   user.reset_password_token_sent_at > 1.hour.ago
+  end
+
+ end
