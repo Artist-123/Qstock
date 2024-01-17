@@ -4,12 +4,13 @@ class OtpMailer < ApplicationMailer
 		mail(to: @user.email, subject: "Welcome, #{@user.name}")
 	end
 
-  
-	def forgot_password_email(user, token)
+
+	def forgot_password_email(user, token, otp)
     @user = user
     @user.generate_reset_password_token 
     @reset_link = "https://yourapp.com/reset_password?token=#{token}"
     @token = token
+    @otp = otp
     mail(to: @user.email, subject: 'Reset Your Password')
   end
 
